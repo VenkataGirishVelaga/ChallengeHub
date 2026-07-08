@@ -1,4 +1,9 @@
+import { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
+import Animated, {
+  FadeIn,
+  FadeInDown,
+} from "react-native-reanimated";
 import { router } from "expo-router";
 
 import Screen from "@/components/Screen";
@@ -10,10 +15,15 @@ import SecondaryButton from "@/components/SecondaryButton";
 import { SPACING } from "@/constants/spacing";
 
 export default function WelcomeScreen() {
+  useEffect(() => {}, []);
+
   return (
     <Screen>
       <View style={styles.container}>
-        <View style={styles.content}>
+        <Animated.View
+          entering={FadeIn.duration(800)}
+          style={styles.content}
+        >
           <Logo />
 
           <AppText variant="title">
@@ -29,22 +39,30 @@ export default function WelcomeScreen() {
           </AppText>
 
           <AppText style={styles.description}>
-            Build better habits, complete exciting challenges,
-            and compete with your friends.
+            Build habits.
+            Complete challenges.
+            Compete with friends.
           </AppText>
-        </View>
+        </Animated.View>
 
-        <View style={styles.actions}>
+        <Animated.View
+          entering={FadeInDown.delay(300).duration(700)}
+          style={styles.actions}
+        >
           <PrimaryButton
             title="Get Started"
-            onPress={() => router.push("/(onboarding)/onboarding")}
+            onPress={() =>
+              router.push("/(onboarding)/onboarding")
+            }
           />
 
           <SecondaryButton
             title="Sign In"
-            onPress={() => router.push("/(auth)/login")}
+            onPress={() =>
+              router.push("/(auth)/login")
+            }
           />
-        </View>
+        </Animated.View>
       </View>
     </Screen>
   );
@@ -64,13 +82,13 @@ const styles = StyleSheet.create({
   },
 
   tagline: {
-    marginTop: SPACING.sm,
+    marginTop: SPACING.xs,
   },
 
   description: {
     marginTop: SPACING.lg,
     textAlign: "center",
-    maxWidth: 300,
+    maxWidth: 260,
   },
 
   actions: {

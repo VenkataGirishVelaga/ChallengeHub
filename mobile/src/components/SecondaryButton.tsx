@@ -36,7 +36,8 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    color: COLORS.textSecondary,
+    color: COLORS.primary,
     fontSize: 16,
+    fontWeight: "600",
   },
 });

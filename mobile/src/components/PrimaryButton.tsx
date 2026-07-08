@@ -32,12 +32,11 @@ export default function PrimaryButton({
 const styles = StyleSheet.create({
   button: {
     backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.md,
+    minHeight: 52,
     borderRadius: RADIUS.full,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
     width: "100%",
-    minHeight: 56,
   },
 
   text: {
