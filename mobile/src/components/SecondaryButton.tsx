@@ -1,48 +1,42 @@
 import React from "react";
 import {
   TouchableOpacity,
-  Text,
   StyleSheet,
   TouchableOpacityProps,
 } from "react-native";
 
+import AppText from "./AppText";
+
 import { COLORS } from "@/constants/colors";
 import { SPACING } from "@/constants/spacing";
-import { RADIUS } from "@/constants/radius";
 
-interface PrimaryButtonProps extends TouchableOpacityProps {
+interface SecondaryButtonProps extends TouchableOpacityProps {
   title: string;
 }
 
-export default function PrimaryButton({
+export default function SecondaryButton({
   title,
   ...props
-}: PrimaryButtonProps) {
+}: SecondaryButtonProps) {
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       style={styles.button}
       {...props}
     >
-      <Text style={styles.text}>{title}</Text>
+      <AppText style={styles.text}>{title}</AppText>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.full,
+    marginTop: SPACING.md,
     alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    minHeight: 56,
   },
 
   text: {
-    color: COLORS.white,
-    fontSize: 18,
-    fontWeight: "600",
+    color: COLORS.textSecondary,
+    fontSize: 16,
   },
 });

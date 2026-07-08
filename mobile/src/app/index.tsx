@@ -1,5 +1,6 @@
 import { Redirect } from "expo-router";
 
 export default function Index() {
-  return <Redirect href="/(onboarding)/splash" />;
+  // Cast to any to satisfy the Redirect href type when route types are not inferred
+  return <Redirect href={"/welcome" as any} />;
 }

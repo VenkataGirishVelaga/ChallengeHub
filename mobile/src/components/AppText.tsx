@@ -38,7 +38,8 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: TYPOGRAPHY.title,
-    fontWeight: "700",
+    fontWeight: "800",
+    letterSpacing: 0.5,
   },
 
   body: {
