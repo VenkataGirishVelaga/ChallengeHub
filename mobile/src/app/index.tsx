@@ -1,6 +1,22 @@
-import { Redirect } from "expo-router";
+import { useEffect } from "react";
+import { router } from "expo-router";
+
+import { hasCompletedOnboarding } from "@/services/storage";
 
 export default function Index() {
-  // Cast to any to satisfy the Redirect href type when route types are not inferred
-  return <Redirect href={"/welcome" as any} />;
+  useEffect(() => {
+    async function check() {
+      const completed = await hasCompletedOnboarding();
+
+      if (completed) {
+        router.replace("/(auth)/login");
+      } else {
+        router.replace("/(onboarding)/welcome");
+      }
+    }
+
+    check();
+  }, []);
+
+  return null;
 }
