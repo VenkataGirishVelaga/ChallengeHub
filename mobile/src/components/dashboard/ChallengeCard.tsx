@@ -27,7 +27,7 @@ export default function ChallengeCard({
         />
 
         <AppText style={styles.title}>
-          Today's Challenge
+          Today&apos;s Challenge
         </AppText>
       </View>
 

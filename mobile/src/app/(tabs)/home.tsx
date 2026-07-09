@@ -13,7 +13,7 @@ import QuickActionCard from "@/components/dashboard/QuickActionCard";
 
 import { getUser } from "@/services/authStorage";
 import { DASHBOARD_DATA } from "@/data/dashboard";
-import { getChallenges } from "@/services/challenge";
+import { getChallenges } from "@/services/challenges";
 import { SPACING } from "@/constants/spacing";
 
 export default function HomeScreen() {
@@ -21,26 +21,23 @@ export default function HomeScreen() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    loadUser();
-    loadChallenges();
-  }, []);
+    async function loadData() {
+      const currentUser = await getUser();
+      setUser(currentUser);
 
-  async function loadUser() {
-    const currentUser = await getUser();
-    setUser(currentUser);
-  }
+      try {
+        const data = await getChallenges();
 
-  async function loadChallenges() {
-    try {
-      const data = await getChallenges();
-
-      if (data.length > 0) {
-        setChallenge(data[0]);
+        if (data.length > 0) {
+          setChallenge(data[0]);
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
     }
-  }
+
+    loadData();
+  }, []);
 
   return (
     <ScrollScreen>

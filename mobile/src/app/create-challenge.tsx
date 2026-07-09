@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Alert,
   ScrollView,
-  StyleSheet,
 } from "react-native";
 import { router } from "expo-router";
 
@@ -11,9 +10,7 @@ import TextField from "@/components/TextField";
 import PrimaryButton from "@/components/PrimaryButton";
 import AppText from "@/components/AppText";
 
-import { createChallenge } from "@/services/challenge";
-
-import { SPACING } from "@/constants/spacing";
+import { createChallenge } from "@/services/challenges";
 
 export default function CreateChallengeScreen() {
   const [title, setTitle] = useState("");
@@ -57,7 +54,7 @@ export default function CreateChallengeScreen() {
       );
 
       router.back();
-    } catch (e) {
+    } catch {
       Alert.alert(
         "Error",
         "Could not create challenge"
@@ -111,9 +108,3 @@ export default function CreateChallengeScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: SPACING.lg,
-  },
-});

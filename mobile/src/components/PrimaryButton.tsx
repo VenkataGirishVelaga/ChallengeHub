@@ -7,7 +7,6 @@ import {
 } from "react-native";
 
 import { COLORS } from "@/constants/colors";
-import { SPACING } from "@/constants/spacing";
 import { RADIUS } from "@/constants/radius";
 
 interface PrimaryButtonProps extends TouchableOpacityProps {

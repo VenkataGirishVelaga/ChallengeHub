@@ -1,7 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
 import AppText from "@/components/AppText";
-import { COLORS } from "@/constants/colors";
 import { SPACING } from "@/constants/spacing";
 
 type GreetingCardProps = {
