@@ -11,7 +11,10 @@ from app.services.challenge_service import (
     create_challenge,
     get_challenges,
 )
-from app.services.user_challenge_service import join_challenge
+from app.services.user_challenge_service import (
+    get_active_challenge,
+    join_challenge,
+)
 
 router = APIRouter(
     prefix="/challenges",
@@ -46,6 +49,16 @@ def get_all(
     db: Session = Depends(get_db),
 ):
     return get_challenges(db)
+
+
+@router.get("/active")
+def active(
+    db: Session = Depends(get_db),
+):
+    return get_active_challenge(
+        db,
+        user_id=1,
+    )
 
 
 @router.post("/{challenge_id}/join")

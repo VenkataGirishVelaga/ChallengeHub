@@ -13,7 +13,7 @@ import QuickActionCard from "@/components/dashboard/QuickActionCard";
 
 import { getUser } from "@/services/authStorage";
 import { DASHBOARD_DATA } from "@/data/dashboard";
-import { getChallenges } from "@/services/challenges";
+import { getActiveChallenge } from "@/services/challenges";
 import { SPACING } from "@/constants/spacing";
 
 export default function HomeScreen() {
@@ -26,11 +26,8 @@ export default function HomeScreen() {
       setUser(currentUser);
 
       try {
-        const data = await getChallenges();
-
-        if (data.length > 0) {
-          setChallenge(data[0]);
-        }
+        const data = await getActiveChallenge();
+        setChallenge(data);
       } catch (error) {
         console.log(error);
       }
@@ -51,12 +48,13 @@ export default function HomeScreen() {
         />
 
         <ChallengeCard
-          challenge={
-            challenge
-              ? `${challenge.title} (${challenge.target} ${challenge.unit})`
-              : "No Challenge Available"
-          }
-          onComplete={() => console.log("Complete")}
+            challenge={
+              challenge
+                ? `${challenge.title}
+          🎯 ${challenge.target} ${challenge.unit}`
+                : "No Active Challenge"
+            }
+            onComplete={() => console.log("Complete")}
         />
 
         <ProgressCard progress={DASHBOARD_DATA.progress} />
@@ -70,7 +68,7 @@ export default function HomeScreen() {
             icon="add-circle"
             title="Create"
             onPress={() =>
-              router.push("/create-challenge" as never)
+              router.push("/challenges/create" as never)
             }
           />
 
@@ -91,7 +89,9 @@ export default function HomeScreen() {
           <QuickActionCard
             icon="list"
             title="Challenges"
-            onPress={() => router.push("/(tabs)/challenges")}
+            onPress={() =>
+              router.push("/challenges")
+            }
           />
         </View>
       </View>

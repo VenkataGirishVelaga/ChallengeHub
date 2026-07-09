@@ -1,24 +1,32 @@
-import { View, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { FlatList } from "react-native";
 
 import Screen from "@/components/Screen";
-import AppText from "@/components/AppText";
+import ChallengeCard from "../../components/challenges/ChallengeCard";
+
+import { getChallenges } from "@/services/challenges";
 
 export default function ChallengesScreen() {
+  const [challenges, setChallenges] = useState([]);
+
+  useEffect(() => {
+    async function load() {
+      const data = await getChallenges();
+      setChallenges(data);
+    }
+
+    load();
+  }, []);
+
   return (
     <Screen>
-      <View style={styles.container}>
-        <AppText variant="title">
-          Challenges
-        </AppText>
-      </View>
+      <FlatList
+        data={challenges}
+        keyExtractor={(item: any) => item.id.toString()}
+        renderItem={({ item }) => (
+          <ChallengeCard challenge={item} />
+        )}
+      />
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
