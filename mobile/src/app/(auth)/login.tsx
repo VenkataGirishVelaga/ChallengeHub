@@ -16,7 +16,10 @@ import PasswordField from "@/components/PasswordField";
 import PrimaryButton from "@/components/PrimaryButton";
 import TextField from "@/components/TextField";
 import { login } from "@/services/auth";
-import { saveToken } from "@/services/authStorage";
+import {
+  saveToken,
+  saveUser,
+} from "@/services/authStorage";
 
 import { COLORS } from "@/constants/colors";
 import { SPACING } from "@/constants/spacing";
@@ -45,6 +48,7 @@ export default function LoginScreen() {
       );
 
       await saveToken(data.access_token);
+      await saveUser(data.user);
 
       router.replace("/(tabs)/home");
     } catch (error: any) {
@@ -85,7 +89,10 @@ export default function LoginScreen() {
         label="Email"
         placeholder="Enter your email"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => {
+          setEmail(text);
+          setEmailError("");
+        }}
         keyboardType="email-address"
         autoCapitalize="none"
         error={emailError}
@@ -104,7 +111,10 @@ export default function LoginScreen() {
       <PasswordField
         label="Password"
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => {
+          setPassword(text);
+          setPasswordError("");
+        }}
         error={passwordError}
       />
 

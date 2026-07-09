@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 
@@ -10,31 +11,59 @@ import ChallengeCard from "@/components/dashboard/ChallengeCard";
 import ProgressCard from "@/components/dashboard/ProgressCard";
 import QuickActionCard from "@/components/dashboard/QuickActionCard";
 
+import { getUser } from "@/services/authStorage";
 import { DASHBOARD_DATA } from "@/data/dashboard";
+import { getChallenges } from "@/services/challenge";
 import { SPACING } from "@/constants/spacing";
 
 export default function HomeScreen() {
+  const [challenge, setChallenge] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    loadUser();
+    loadChallenges();
+  }, []);
+
+  async function loadUser() {
+    const currentUser = await getUser();
+    setUser(currentUser);
+  }
+
+  async function loadChallenges() {
+    try {
+      const data = await getChallenges();
+
+      if (data.length > 0) {
+        setChallenge(data[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <ScrollScreen>
       <View style={styles.container}>
-        {/* Greeting */}
-        <GreetingCard name={DASHBOARD_DATA.name} />
-
-        {/* Current Streak */}
-        <StatsCard streak={DASHBOARD_DATA.streak} />
-
-        {/* Today's Challenge */}
-        <ChallengeCard
-          challenge={DASHBOARD_DATA.todayChallenge}
-          onComplete={() =>
-            console.log("Challenge Completed")
-          }
+        <GreetingCard
+          name={user?.name ?? "Player"}
         />
 
-        {/* Weekly Progress */}
+        <StatsCard
+          streak={user?.streak ?? 0}
+        />
+
+        <ChallengeCard
+          challenge={
+            challenge
+              ? `${challenge.title} (${challenge.target} ${challenge.unit})`
+              : "No Challenge Available"
+          }
+          onComplete={() => console.log("Complete")}
+        />
+
         <ProgressCard progress={DASHBOARD_DATA.progress} />
 
-        {/* Quick Actions */}
         <AppText variant="body" style={styles.quickTitle}>
           Quick Actions
         </AppText>
@@ -43,15 +72,15 @@ export default function HomeScreen() {
           <QuickActionCard
             icon="add-circle"
             title="Create"
-            onPress={() => {}}
+            onPress={() =>
+              router.push("/create-challenge" as never)
+            }
           />
 
           <QuickActionCard
             icon="trophy"
             title="Leaderboard"
-            onPress={() =>
-              router.push("/(tabs)/leaderboard")
-            }
+            onPress={() => router.push("/(tabs)/leaderboard")}
           />
         </View>
 
@@ -59,17 +88,13 @@ export default function HomeScreen() {
           <QuickActionCard
             icon="person"
             title="Profile"
-            onPress={() =>
-              router.push("/(tabs)/profile")
-            }
+            onPress={() => router.push("/(tabs)/profile")}
           />
 
           <QuickActionCard
             icon="list"
             title="Challenges"
-            onPress={() =>
-              router.push("/(tabs)/challenges")
-            }
+            onPress={() => router.push("/(tabs)/challenges")}
           />
         </View>
       </View>
