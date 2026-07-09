@@ -22,3 +22,14 @@ def create_user(
 	db.commit()
 	db.refresh(user)
 	return user
+
+
+def authenticate_user(
+	db: Session,
+	email: str,
+):
+	return (
+		db.query(User)
+		.filter(User.email == email)
+		.first()
+	)

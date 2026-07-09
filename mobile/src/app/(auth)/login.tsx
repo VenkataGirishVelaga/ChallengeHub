@@ -1,11 +1,13 @@
 import { useState } from "react";
 import {
+  Alert,
   Pressable,
   StyleSheet,
   View,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import AuthLayout from "@/components/AuthLayout";
 import AppText from "@/components/AppText";
@@ -14,13 +16,10 @@ import AuthHeader from "@/components/AuthHeader";
 import PasswordField from "@/components/PasswordField";
 import PrimaryButton from "@/components/PrimaryButton";
 import TextField from "@/components/TextField";
+import { login } from "@/services/auth";
 
 import { COLORS } from "@/constants/colors";
 import { SPACING } from "@/constants/spacing";
-import {
-  validateEmail,
-  validatePassword,
-} from "@/utils/validators";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -32,30 +31,30 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    const emailValidation = validateEmail(email);
-    const passwordValidation = validatePassword(password);
-
-    setEmailError(emailValidation);
-    setPasswordError(passwordValidation);
-
-    if (emailValidation || passwordValidation) {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter email and password");
       return;
     }
 
     try {
       setLoading(true);
 
-      // TODO:
-      // FastAPI Login API
-
-      console.log({
+      const data = await login(
         email,
         password,
-      });
+      );
+
+      await AsyncStorage.setItem(
+        "access_token",
+        data.access_token
+      );
 
       router.replace("/(tabs)/home");
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      Alert.alert(
+        "Login Failed",
+        error?.response?.data?.detail ?? "Something went wrong"
+      );
     } finally {
       setLoading(false);
     }
