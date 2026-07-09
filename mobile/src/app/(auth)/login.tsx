@@ -7,7 +7,6 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import AuthLayout from "@/components/AuthLayout";
 import AppText from "@/components/AppText";
@@ -17,6 +16,7 @@ import PasswordField from "@/components/PasswordField";
 import PrimaryButton from "@/components/PrimaryButton";
 import TextField from "@/components/TextField";
 import { login } from "@/services/auth";
+import { saveToken } from "@/services/authStorage";
 
 import { COLORS } from "@/constants/colors";
 import { SPACING } from "@/constants/spacing";
@@ -44,10 +44,7 @@ export default function LoginScreen() {
         password,
       );
 
-      await AsyncStorage.setItem(
-        "access_token",
-        data.access_token
-      );
+      await saveToken(data.access_token);
 
       router.replace("/(tabs)/home");
     } catch (error: any) {
