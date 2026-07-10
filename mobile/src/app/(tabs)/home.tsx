@@ -68,7 +68,7 @@ export default function HomeScreen() {
             icon="add-circle"
             title="Create"
             onPress={() =>
-              router.push("/challenges/create" as never)
+              router.push("/running/start")
             }
           />
 
