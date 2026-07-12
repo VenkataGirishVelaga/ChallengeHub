@@ -37,3 +37,28 @@ def get_active_challenge(
         )
         .first()
     )
+
+
+def update_progress(
+    db: Session,
+    user_id: int,
+    distance: float,
+):
+    challenge = (
+        db.query(UserChallenge)
+        .filter(
+            UserChallenge.user_id == user_id,
+            UserChallenge.status == "ACTIVE",
+        )
+        .first()
+    )
+
+    if not challenge:
+        return None
+
+    challenge.progress += distance
+
+    db.commit()
+    db.refresh(challenge)
+
+    return challenge

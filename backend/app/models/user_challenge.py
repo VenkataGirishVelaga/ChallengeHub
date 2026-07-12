@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Float
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
@@ -10,7 +10,7 @@ class UserChallenge(Base):
     __tablename__ = "user_challenges"
 
     id: Mapped[int] = mapped_column(
-        Integer,
+        Integer,          # <-- KEEP Integer
         primary_key=True,
         index=True,
     )
@@ -30,8 +30,8 @@ class UserChallenge(Base):
         default="ACTIVE",
     )
 
-    progress: Mapped[int] = mapped_column(
-        Integer,
+    progress: Mapped[float] = mapped_column(   # <-- CHANGE THIS
+        Float,
         default=0,
     )
 

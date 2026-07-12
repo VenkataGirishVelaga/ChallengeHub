@@ -5,6 +5,7 @@ from app.database.dependencies import get_db
 from app.models.run import Run
 from app.schemas.run import RunCreate, RunResponse
 from app.services.run_service import create_run
+from app.services.user_challenge_service import update_progress
 
 router = APIRouter(
     prefix="/runs",
@@ -29,4 +30,12 @@ def save_run(
         calories=data.calories,
     )
 
-    return create_run(db, run)
+    run = create_run(db, run)
+
+    update_progress(
+        db,
+        user_id=1,
+        distance=data.distance,
+    )
+
+    return run
