@@ -1,10 +1,20 @@
 import { View, StyleSheet } from "react-native";
-import{ useState } from "react";
+import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
+import { Alert } from "react-native";
 import { saveRun } from "@/services/running";
 import Screen from "@/components/Screen";
 import AppText from "@/components/AppText";
 import PrimaryButton from "@/components/PrimaryButton";
+
+const BADGE_TITLES: Record<string, string> = {
+  first_run: "🏃 First Steps",
+  runs_5: "🔥 Getting Started",
+  runs_25: "💪 Committed",
+  distance_10k: "🎯 10K Club",
+  distance_50k: "🏅 50K Club",
+  distance_100k: "🏆 Centurion",
+};
 
 export default function RunSummaryScreen() {
   const [saving, setSaving] = useState(false);
@@ -66,13 +76,39 @@ export default function RunSummaryScreen() {
             setSaving(true);
 
             try {
-              await saveRun(
+              const result = await saveRun(
                 Number(distance),
                 Number(seconds),
                 Number(calories)
               );
 
-              router.replace("/(tabs)/home");
+              const messages: string[] = [];
+
+              if (result?.challenge_completed) {
+                messages.push("🎉 Challenge completed! XP awarded.");
+              }
+
+              if (result?.new_badges?.length) {
+                const names = result.new_badges
+                  .map((code: string) => BADGE_TITLES[code] ?? code)
+                  .join("\n");
+                messages.push(`New badge${result.new_badges.length > 1 ? "s" : ""} unlocked:\n${names}`);
+              }
+
+              if (messages.length) {
+                Alert.alert(
+                  "Nice work!",
+                  messages.join("\n\n"),
+                  [
+                    {
+                      text: "Continue",
+                      onPress: () => router.replace("/(tabs)/home"),
+                    },
+                  ]
+                );
+              } else {
+                router.replace("/(tabs)/home");
+              }
             } catch (error) {
               console.log(error);
               setSaving(false);

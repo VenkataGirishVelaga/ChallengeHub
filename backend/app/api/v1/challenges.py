@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.auth import get_current_user
 from app.database.dependencies import get_db
 from app.models.challenge import Challenge
+from app.models.user import User
 from app.schemas.challenge import (
     ChallengeCreate,
     ChallengeResponse,
@@ -13,6 +15,7 @@ from app.services.challenge_service import (
 )
 from app.services.user_challenge_service import (
     get_active_challenge,
+    get_active_progress,
     join_challenge,
 )
 
@@ -29,10 +32,11 @@ router = APIRouter(
 def create(
     challenge: ChallengeCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     db_challenge = Challenge(
         **challenge.model_dump(),
-        created_by=1,
+        created_by=current_user.id,
     )
 
     return create_challenge(
@@ -54,10 +58,22 @@ def get_all(
 @router.get("/active")
 def active(
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return get_active_challenge(
         db,
-        user_id=1,
+        user_id=current_user.id,
+    )
+
+
+@router.get("/progress")
+def progress(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return get_active_progress(
+        db,
+        user_id=current_user.id,
     )
 
 
@@ -65,9 +81,10 @@ def active(
 def join(
     challenge_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     return join_challenge(
         db,
-        user_id=1,
+        user_id=current_user.id,
         challenge_id=challenge_id,
     )

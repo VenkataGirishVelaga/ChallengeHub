@@ -12,13 +12,13 @@ import ProgressCard from "@/components/dashboard/ProgressCard";
 import QuickActionCard from "@/components/dashboard/QuickActionCard";
 
 import { getUser } from "@/services/authStorage";
-import { DASHBOARD_DATA } from "@/data/dashboard";
-import { getActiveChallenge } from "@/services/challenges";
+import { getActiveChallenge, getActiveProgress } from "@/services/challenges";
 import { SPACING } from "@/constants/spacing";
 
 export default function HomeScreen() {
   const [challenge, setChallenge] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
+  const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
     async function loadData() {
@@ -28,6 +28,13 @@ export default function HomeScreen() {
       try {
         const data = await getActiveChallenge();
         setChallenge(data);
+      } catch (error) {
+        console.log(error);
+      }
+
+      try {
+        const progressData = await getActiveProgress();
+        setProgress(progressData?.percent ?? 0);
       } catch (error) {
         console.log(error);
       }
@@ -54,10 +61,15 @@ export default function HomeScreen() {
           🎯 ${challenge.target} ${challenge.unit}`
                 : "No Active Challenge"
             }
-            onComplete={() => console.log("Complete")}
+            buttonLabel={challenge ? "Go Run" : "Browse Challenges"}
+            onAction={() =>
+              challenge
+                ? router.push("/running/start")
+                : router.push("/challenges")
+            }
         />
 
-        <ProgressCard progress={DASHBOARD_DATA.progress} />
+        <ProgressCard progress={progress} />
 
         <AppText variant="body" style={styles.quickTitle}>
           Quick Actions

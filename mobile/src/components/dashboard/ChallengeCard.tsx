@@ -10,12 +10,14 @@ import { SPACING } from "@/constants/spacing";
 
 type Props = {
   challenge: string;
-  onComplete: () => void;
+  buttonLabel?: string;
+  onAction: () => void;
 };
 
 export default function ChallengeCard({
   challenge,
-  onComplete,
+  buttonLabel = "Go Run",
+  onAction,
 }: Props) {
   return (
     <View style={styles.card}>
@@ -36,8 +38,8 @@ export default function ChallengeCard({
       </AppText>
 
       <PrimaryButton
-        title="Complete"
-        onPress={onComplete}
+        title={buttonLabel}
+        onPress={onAction}
       />
     </View>
   );

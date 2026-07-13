@@ -12,6 +12,14 @@ export async function getActiveChallenge() {
 
   return response.data;
 }
+
+export async function getActiveProgress() {
+  const response = await api.get(
+    "/challenges/progress"
+  );
+
+  return response.data;
+}
 export async function createChallenge(challenge: any) {
   const response = await api.post(
     "/challenges",

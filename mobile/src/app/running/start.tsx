@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import Screen from "@/components/Screen";
@@ -7,6 +8,11 @@ import AppText from "@/components/AppText";
 import { router } from "expo-router";
 
 import useRunTracker from "@/hooks/useRunTracker";
+import { getActiveProgress } from "@/services/challenges";
+
+import { COLORS } from "@/constants/colors";
+import { SPACING } from "@/constants/spacing";
+import { RADIUS } from "@/constants/radius";
 
 export default function StartRunScreen() {
   const {
@@ -20,9 +26,48 @@ export default function StartRunScreen() {
     finishRun,
   } = useRunTracker();
 
+  const [challengeProgress, setChallengeProgress] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadProgress() {
+      try {
+        const data = await getActiveProgress();
+        setChallengeProgress(data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    loadProgress();
+  }, []);
+
+  // distance from the tracker is in meters mid-run; challengeProgress
+  // fields (progress/target) come from the backend in km, matching
+  // what actually gets saved (see summary.tsx's km conversion).
+  const sessionKm = distance / 1000;
+  const remainingBeforeRun = challengeProgress
+    ? Math.max(0, challengeProgress.target - challengeProgress.progress)
+    : null;
+  const remainingNow = challengeProgress
+    ? Math.max(0, remainingBeforeRun! - sessionKm)
+    : null;
+
   return (
     <Screen>
       <View style={styles.container}>
+        {challengeProgress && (
+          <View style={styles.challengeCard}>
+            <AppText style={styles.challengeTitle}>
+              🎯 {challengeProgress.title}
+            </AppText>
+            <AppText style={styles.challengeRemaining}>
+              {remainingNow! > 0
+                ? `${remainingNow!.toFixed(2)} km to go`
+                : "Target reached this run! 🎉"}
+            </AppText>
+          </View>
+        )}
+
         {!running ? (
           <PrimaryButton
             title="Start Run"
@@ -45,7 +90,7 @@ export default function StartRunScreen() {
 
               <AppText style={styles.label}>📍 Distance</AppText>
               <AppText style={styles.value}>
-                {(distance / 1000).toFixed(2)} km
+                {sessionKm.toFixed(2)} km
               </AppText>
 
               <AppText style={styles.label}>⚡ Pace</AppText>
@@ -90,6 +135,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+
+  challengeCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+
+  challengeTitle: {
+    fontWeight: "700",
+    fontSize: 16,
+    marginBottom: 4,
+  },
+
+  challengeRemaining: {
+    color: COLORS.textSecondary,
+    fontWeight: "600",
   },
 
   title: {
