@@ -161,6 +161,15 @@ export default function ProfileScreen() {
 
         <Pressable
           style={styles.historyButton}
+          onPress={() => router.push("/friends")}
+        >
+          <AppText style={styles.historyText}>
+            Friends
+          </AppText>
+        </Pressable>
+
+        <Pressable
+          style={styles.historyButton}
           onPress={() => router.push("/running/history")}
         >
           <AppText style={styles.historyText}>

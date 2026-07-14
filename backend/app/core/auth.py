@@ -28,6 +28,9 @@ def get_current_user(
 			algorithms=[settings.ALGORITHM],
 		)
 
+		if payload.get("type") == "refresh":
+			raise credentials_exception
+
 		user_id = int(payload.get("sub"))
 
 	except JWTError:
@@ -43,3 +46,25 @@ def get_current_user(
 		raise credentials_exception
 
 	return user
+
+
+def decode_refresh_token(token: str):
+	credentials_exception = HTTPException(
+		status_code=status.HTTP_401_UNAUTHORIZED,
+		detail="Invalid or expired refresh token",
+	)
+
+	try:
+		payload = jwt.decode(
+			token,
+			settings.SECRET_KEY,
+			algorithms=[settings.ALGORITHM],
+		)
+
+		if payload.get("type") != "refresh":
+			raise credentials_exception
+
+		return int(payload.get("sub"))
+
+	except JWTError:
+		raise credentials_exception

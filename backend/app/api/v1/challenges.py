@@ -60,9 +60,23 @@ def active(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Active DISTANCE-type challenge (unchanged behavior)."""
     return get_active_challenge(
         db,
         user_id=current_user.id,
+    )
+
+
+@router.get("/active/checkin")
+def active_checkin(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Active CHECKIN-type challenge, if any."""
+    return get_active_challenge(
+        db,
+        user_id=current_user.id,
+        checkin_only=True,
     )
 
 
@@ -71,9 +85,23 @@ def progress(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    """Progress for the active DISTANCE-type challenge (unchanged)."""
     return get_active_progress(
         db,
         user_id=current_user.id,
+    )
+
+
+@router.get("/progress/checkin")
+def progress_checkin(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Streak/progress for the active CHECKIN-type challenge, if any."""
+    return get_active_progress(
+        db,
+        user_id=current_user.id,
+        checkin_only=True,
     )
 
 

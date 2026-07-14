@@ -17,6 +17,7 @@ import PrimaryButton from "@/components/PrimaryButton";
 import TextField from "@/components/TextField";
 import { login } from "@/services/auth";
 import {
+  saveRefreshToken,
   saveToken,
   saveUser,
 } from "@/services/authStorage";
@@ -46,8 +47,9 @@ export default function LoginScreen() {
         email,
         password,
       );
-
+      
       await saveToken(data.access_token);
+      await saveRefreshToken(data.refresh_token);
       await saveUser(data.user);
 
       router.replace("/(tabs)/home");
