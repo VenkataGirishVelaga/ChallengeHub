@@ -1,47 +1,42 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 import ScrollScreen from "@/components/ScrollScreen";
 import AppText from "@/components/AppText";
 
 import GreetingCard from "@/components/dashboard/GreetingCard";
 import StatsCard from "@/components/dashboard/StatsCard";
-import ChallengeCard from "@/components/dashboard/ChallengeCard";
-import ProgressCard from "@/components/dashboard/ProgressCard";
+import ActiveChallengeCard from "@/components/dashboard/ActiveChallengeCard";
 import QuickActionCard from "@/components/dashboard/QuickActionCard";
 
 import { getUser } from "@/services/authStorage";
-import { getActiveChallenge, getActiveProgress } from "@/services/challenges";
+import { getAllActiveChallenges } from "@/services/challenges";
 import { SPACING } from "@/constants/spacing";
+import { COLORS } from "@/constants/colors";
+import { RADIUS } from "@/constants/radius";
 
 export default function HomeScreen() {
-  const [challenge, setChallenge] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
-  const [progress, setProgress] = useState<number>(0);
+  const [activeChallenges, setActiveChallenges] = useState<any[]>([]);
 
-  useEffect(() => {
-    async function loadData() {
-      const currentUser = await getUser();
-      setUser(currentUser);
+  const loadData = useCallback(async () => {
+    const currentUser = await getUser();
+    setUser(currentUser);
 
-      try {
-        const data = await getActiveChallenge();
-        setChallenge(data);
-      } catch (error) {
-        console.log(error);
-      }
-
-      try {
-        const progressData = await getActiveProgress();
-        setProgress(progressData?.percent ?? 0);
-      } catch (error) {
-        console.log(error);
-      }
+    try {
+      const data = await getAllActiveChallenges();
+      setActiveChallenges(data);
+    } catch (error) {
+      console.log(error);
     }
-
-    loadData();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   return (
     <ScrollScreen>
@@ -54,22 +49,31 @@ export default function HomeScreen() {
           streak={user?.streak ?? 0}
         />
 
-        <ChallengeCard
-            challenge={
-              challenge
-                ? `${challenge.title}
-          🎯 ${challenge.target} ${challenge.unit}`
-                : "No Active Challenge"
-            }
-            buttonLabel={challenge ? "Go Run" : "Browse Challenges"}
-            onAction={() =>
-              challenge
-                ? router.push("/running/start")
-                : router.push("/challenges")
-            }
-        />
+        <AppText variant="body" style={styles.sectionTitle}>
+          Today&apos;s Challenges
+        </AppText>
 
-        <ProgressCard progress={progress} />
+        {activeChallenges.length === 0 ? (
+          <View style={styles.emptyCard}>
+            <AppText variant="caption" style={styles.emptyText}>
+              You haven&apos;t joined any challenges yet.
+            </AppText>
+
+            <QuickActionCard
+              icon="add-circle"
+              title="Browse Challenges"
+              onPress={() => router.push("/challenges")}
+            />
+          </View>
+        ) : (
+          activeChallenges.map((entry) => (
+            <ActiveChallengeCard
+              key={`${entry.challenge_type}-${entry.challenge_id}`}
+              entry={entry}
+              onChanged={loadData}
+            />
+          ))
+        )}
 
         <AppText variant="body" style={styles.quickTitle}>
           Quick Actions
@@ -80,7 +84,7 @@ export default function HomeScreen() {
             icon="add-circle"
             title="Create"
             onPress={() =>
-              router.push("/running/start")
+              router.push("/challenges/create")
             }
           />
 
@@ -115,6 +119,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: SPACING.lg,
+  },
+
+  sectionTitle: {
+    marginBottom: SPACING.md,
+    fontWeight: "700",
+  },
+
+  emptyCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.xl,
+    padding: SPACING.lg,
+    marginBottom: SPACING.lg,
+  },
+
+  emptyText: {
+    marginBottom: SPACING.md,
+    textAlign: "center",
   },
 
   quickTitle: {

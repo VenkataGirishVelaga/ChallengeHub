@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user
@@ -11,12 +11,15 @@ from app.schemas.challenge import (
 )
 from app.services.challenge_service import (
     create_challenge,
+    delete_challenge,
     get_challenges,
 )
 from app.services.user_challenge_service import (
     get_active_challenge,
     get_active_progress,
+    get_all_active_challenges,
     join_challenge,
+    leave_challenge,
 )
 
 router = APIRouter(
@@ -80,6 +83,23 @@ def active_checkin(
     )
 
 
+@router.get("/active/all")
+def active_all(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Every ACTIVE challenge the user has joined, distance and
+    check-in alike — use this when a user may have joined more than
+    one challenge, instead of /active + /active/checkin which each
+    only ever surface a single one.
+    """
+    return get_all_active_challenges(
+        db,
+        user_id=current_user.id,
+    )
+
+
 @router.get("/progress")
 def progress(
     db: Session = Depends(get_db),
@@ -111,8 +131,49 @@ def join(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return join_challenge(
-        db,
-        user_id=current_user.id,
-        challenge_id=challenge_id,
-    )
+    try:
+        return join_challenge(
+            db,
+            user_id=current_user.id,
+            challenge_id=challenge_id,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+
+@router.delete("/{challenge_id}/leave")
+def leave(
+    challenge_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Leave a challenge you joined — doesn't affect other members."""
+    try:
+        leave_challenge(
+            db,
+            user_id=current_user.id,
+            challenge_id=challenge_id,
+        )
+
+        return {"detail": "Left challenge"}
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+
+@router.delete("/{challenge_id}")
+def delete(
+    challenge_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Delete a challenge you created — cascades to every member's enrollment."""
+    try:
+        delete_challenge(
+            db,
+            challenge_id=challenge_id,
+            user_id=current_user.id,
+        )
+
+        return {"detail": "Challenge deleted"}
+    except ValueError as error:
+        raise HTTPException(status_code=403, detail=str(error))

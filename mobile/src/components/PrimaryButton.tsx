@@ -15,12 +15,13 @@ interface PrimaryButtonProps extends TouchableOpacityProps {
 
 export default function PrimaryButton({
   title,
+  style,
   ...props
 }: PrimaryButtonProps) {
   return (
     <TouchableOpacity
       activeOpacity={0.8}
-      style={styles.button}
+      style={[styles.button, style]}
       {...props}
     >
       <Text style={styles.text}>{title}</Text>

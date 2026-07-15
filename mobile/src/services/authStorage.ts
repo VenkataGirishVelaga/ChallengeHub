@@ -35,12 +35,21 @@ export async function removeRefreshToken() {
   await removeItem(REFRESH_TOKEN_KEY);
 }
 
-export async function saveUser(user: any) {
+export type StoredUser = {
+  id: number;
+  name: string;
+  email: string;
+  level: number;
+  xp: number;
+  streak: number;
+};
+
+export async function saveUser(user: StoredUser) {
   await setJSON(USER_KEY, user);
 }
 
 export async function getUser() {
-  return getJSON(USER_KEY);
+  return getJSON<StoredUser>(USER_KEY);
 }
 
 export async function removeUser() {
