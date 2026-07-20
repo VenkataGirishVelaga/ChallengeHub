@@ -7,33 +7,31 @@ import AppText from "@/components/AppText";
 
 import { router } from "expo-router";
 
-import useRunTracker from "@/hooks/useRunTracker";
-import { getActiveProgress } from "@/services/challenges";
-import { getActivityMeta } from "@/utils/activity";
+import useStepTracker from "@/hooks/useStepTracker";
+import { api } from "@/lib/api";
 
 import { COLORS } from "@/constants/colors";
 import { SPACING } from "@/constants/spacing";
 import { RADIUS } from "@/constants/radius";
 
-export default function StartRunScreen() {
+export default function StartWalkScreen() {
   const {
-    location,
-    running,
-    distance,
+    available,
+    walking,
+    steps,
     seconds,
-    pace,
     calories,
-    startRun,
-    finishRun,
-  } = useRunTracker();
+    startWalk,
+    finishWalk,
+  } = useStepTracker();
 
   const [challengeProgress, setChallengeProgress] = useState<any>(null);
 
   useEffect(() => {
     async function loadProgress() {
       try {
-        const data = await getActiveProgress();
-        setChallengeProgress(data);
+        const response = await api.get("/challenges/progress/walking");
+        setChallengeProgress(response.data);
       } catch (error) {
         console.log(error);
       }
@@ -42,22 +40,24 @@ export default function StartRunScreen() {
     loadProgress();
   }, []);
 
-  const activity = getActivityMeta(challengeProgress?.activity);
-
-  // distance from the tracker is in meters mid-run; challengeProgress
-  // fields (progress/target) come from the backend in km, matching
-  // what actually gets saved (see summary.tsx's km conversion).
-  const sessionKm = distance / 1000;
-  const remainingBeforeRun = challengeProgress
+  const remainingBefore = challengeProgress
     ? Math.max(0, challengeProgress.target - challengeProgress.progress)
     : null;
   const remainingNow = challengeProgress
-    ? Math.max(0, remainingBeforeRun! - sessionKm)
+    ? Math.max(0, remainingBefore! - steps)
     : null;
 
   return (
     <Screen>
       <View style={styles.container}>
+        {available === false && (
+          <View style={styles.challengeCard}>
+            <AppText style={styles.challengeRemaining}>
+              Step counting isn't available on this device.
+            </AppText>
+          </View>
+        )}
+
         {challengeProgress && (
           <View style={styles.challengeCard}>
             <AppText style={styles.challengeTitle}>
@@ -65,21 +65,21 @@ export default function StartRunScreen() {
             </AppText>
             <AppText style={styles.challengeRemaining}>
               {remainingNow! > 0
-                ? `${remainingNow!.toFixed(2)} km to go`
-                : "Target reached this run! 🎉"}
+                ? `${Math.round(remainingNow!)} steps to go`
+                : "Target reached this walk! 🎉"}
             </AppText>
           </View>
         )}
 
-        {!running ? (
+        {!walking ? (
           <PrimaryButton
-            title={`Start ${activity.noun}`}
-            onPress={startRun}
+            title="Start Walk"
+            onPress={startWalk}
           />
         ) : (
           <>
             <AppText style={styles.title}>
-              {activity.emoji} {activity.label}
+              🚶 Walk Session
             </AppText>
 
             <View style={styles.stats}>
@@ -91,39 +91,28 @@ export default function StartRunScreen() {
                   .padStart(2, "0")}
               </AppText>
 
-              <AppText style={styles.label}>📍 Distance</AppText>
+              <AppText style={styles.label}>👣 Steps</AppText>
               <AppText style={styles.value}>
-                {sessionKm.toFixed(2)} km
-              </AppText>
-
-              <AppText style={styles.label}>⚡ Pace</AppText>
-              <AppText style={styles.value}>
-                {pace}
+                {steps}
               </AppText>
 
               <AppText style={styles.label}>🔥 Calories</AppText>
               <AppText style={styles.value}>
                 {calories} kcal
               </AppText>
-
-              <AppText style={styles.gps}>
-                🟢 GPS Connected
-              </AppText>
             </View>
 
             <PrimaryButton
-              title={`Finish ${activity.noun}`}
-            onPress={() => {
-                finishRun();
+              title="Finish Walk"
+              onPress={() => {
+                finishWalk();
 
                 router.push({
-                  pathname: "/running/summary",
+                  pathname: "/walking/summary",
                   params: {
-                    distance: (distance / 1000).toFixed(2),
+                    steps: steps.toString(),
                     seconds: seconds.toString(),
-                    pace,
-                    calories,
-                    activity: challengeProgress?.activity ?? "running",
+                    calories: calories.toString(),
                   },
                 });
               }}
@@ -174,13 +163,6 @@ const styles = StyleSheet.create({
 
   value: {
     fontSize: 36,
-    fontWeight: "700",
-  },
-
-  gps: {
-    marginTop: 40,
-    textAlign: "center",
-    color: "green",
     fontWeight: "700",
   },
 

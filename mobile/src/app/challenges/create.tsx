@@ -20,18 +20,19 @@ import { RADIUS } from "@/constants/radius";
 import { SPACING } from "@/constants/spacing";
 
 type Kind = "distance" | "checkin";
+type Activity = "running" | "walking";
 
 const DURATION_OPTIONS = [7, 30, 60, 100];
 
 export default function CreateChallengeScreen() {
   const [kind, setKind] = useState<Kind>("distance");
+  const [activity, setActivity] = useState<Activity>("running");
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
   // distance-type fields
   const [target, setTarget] = useState("");
-  const [unit, setUnit] = useState("km");
 
   // checkin-type fields
   const [durationDays, setDurationDays] = useState(30);
@@ -43,7 +44,12 @@ export default function CreateChallengeScreen() {
     }
 
     if (kind === "distance" && !target) {
-      Alert.alert("Error", "Please set a target distance");
+      Alert.alert(
+        "Error",
+        activity === "running"
+          ? "Please set a target distance"
+          : "Please set a target step count"
+      );
       return;
     }
 
@@ -52,9 +58,9 @@ export default function CreateChallengeScreen() {
         await createChallenge({
           title,
           description,
-          type: "running",
+          type: activity,
           target: Number(target),
-          unit,
+          unit: activity === "running" ? "km" : "steps",
           difficulty: "easy",
           xp_reward: 100,
           is_public: true,
@@ -102,7 +108,7 @@ export default function CreateChallengeScreen() {
                   : styles.kindText
               }
             >
-              🏃 Distance
+              📍 Distance
             </AppText>
           </Pressable>
 
@@ -125,10 +131,56 @@ export default function CreateChallengeScreen() {
           </Pressable>
         </View>
 
+        {kind === "distance" && (
+          <>
+            <AppText style={styles.durationLabel}>Activity</AppText>
+
+            <View style={styles.durationRow}>
+              <Pressable
+                style={[
+                  styles.durationChip,
+                  activity === "running" && styles.durationChipActive,
+                ]}
+                onPress={() => setActivity("running")}
+              >
+                <AppText
+                  style={
+                    activity === "running"
+                      ? styles.durationTextActive
+                      : styles.durationText
+                  }
+                >
+                  🏃 Running
+                </AppText>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.durationChip,
+                  activity === "walking" && styles.durationChipActive,
+                ]}
+                onPress={() => setActivity("walking")}
+              >
+                <AppText
+                  style={
+                    activity === "walking"
+                      ? styles.durationTextActive
+                      : styles.durationText
+                  }
+                >
+                  🚶 Walking
+                </AppText>
+              </Pressable>
+            </View>
+          </>
+        )}
+
         <AppText variant="caption" style={styles.kindHint}>
-          {kind === "distance"
-            ? "Progress is tracked automatically from your saved runs."
-            : "Tap Check In once a day to build a streak — great for habits like meditation, reading, or pushups."}
+          {kind === "checkin"
+            ? "Tap Check In once a day to build a streak — great for habits like meditation, reading, or pushups."
+            : activity === "running"
+            ? "Progress is tracked automatically from your GPS-tracked runs."
+            : "Progress is tracked automatically from your step count while a walk session is active."}
         </AppText>
 
         <TextField
@@ -144,20 +196,16 @@ export default function CreateChallengeScreen() {
         />
 
         {kind === "distance" ? (
-          <>
-            <TextField
-              label="Target"
-              value={target}
-              keyboardType="numeric"
-              onChangeText={setTarget}
-            />
-
-            <TextField
-              label="Unit"
-              value={unit}
-              onChangeText={setUnit}
-            />
-          </>
+          <TextField
+            label={
+              activity === "running"
+                ? "Target distance (km)"
+                : "Target steps"
+            }
+            value={target}
+            keyboardType="numeric"
+            onChangeText={setTarget}
+          />
         ) : (
           <>
             <AppText style={styles.durationLabel}>
@@ -212,7 +260,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     padding: 4,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.lg,
   },
 
   kindButton: {

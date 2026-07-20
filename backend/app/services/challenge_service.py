@@ -30,6 +30,39 @@ def get_challenge(
     )
 
 
+def update_challenge(
+    db: Session,
+    challenge_id: int,
+    user_id: int,
+    updates: dict,
+):
+    """
+    Only the creator can edit a challenge. `updates` should already
+    be trimmed to just the fields being changed (e.g. via Pydantic's
+    model_dump(exclude_unset=True)) — anything not present is left
+    untouched rather than reset to a default.
+    """
+    challenge = (
+        db.query(Challenge)
+        .filter(Challenge.id == challenge_id)
+        .first()
+    )
+
+    if not challenge:
+        raise ValueError("Challenge not found")
+
+    if challenge.created_by != user_id:
+        raise ValueError("Only the creator can edit this challenge")
+
+    for field, value in updates.items():
+        setattr(challenge, field, value)
+
+    db.commit()
+    db.refresh(challenge)
+
+    return challenge
+
+
 def delete_challenge(
     db: Session,
     challenge_id: int,

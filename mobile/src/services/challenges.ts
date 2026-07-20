@@ -21,6 +21,14 @@ export async function getActiveProgress() {
   return response.data;
 }
 
+export async function getWalkingProgress() {
+  const response = await api.get(
+    "/challenges/progress/walking"
+  );
+
+  return response.data;
+}
+
 export async function getActiveCheckinChallenge() {
   const response = await api.get(
     "/challenges/active/checkin"
@@ -74,6 +82,15 @@ export async function createChallenge(challenge: any) {
   return response.data;
 }
 
+export async function updateChallenge(id: number, updates: any) {
+  const response = await api.patch(
+    `/challenges/${id}`,
+    updates
+  );
+
+  return response.data;
+}
+
 export async function joinChallenge(id: number) {
   const response = await api.post(
     `/challenges/${id}/join`
@@ -95,5 +112,60 @@ export async function deleteChallenge(id: number) {
     `/challenges/${id}`
   );
 
+  return response.data;
+}
+
+export async function inviteFriendToChallenge(
+  challengeId: number,
+  friendId: number
+) {
+  const response = await api.post(
+    `/challenges/${challengeId}/invite/${friendId}`
+  );
+
+  return response.data;
+}
+
+export async function getReceivedChallengeInvites() {
+  const response = await api.get("/challenges/invites");
+  return response.data;
+}
+
+export async function getSentChallengeInvites() {
+  const response = await api.get("/challenges/invites/sent");
+  return response.data;
+}
+
+export async function acceptChallengeInvite(inviteId: number) {
+  const response = await api.post(
+    `/challenges/invites/${inviteId}/accept`
+  );
+
+  return response.data;
+}
+
+export async function declineChallengeInvite(inviteId: number) {
+  const response = await api.post(
+    `/challenges/invites/${inviteId}/decline`
+  );
+
+  return response.data;
+}
+
+export async function getChallengeRivals(challengeId: number) {
+  const response = await api.get(
+    `/challenges/${challengeId}/rivals`
+  );
+
+  return response.data;
+}
+
+export async function getUnseenAcceptedInvites() {
+  const response = await api.get("/challenges/invites/accepted");
+  return response.data;
+}
+
+export async function markInviteSeen(inviteId: number) {
+  const response = await api.post(`/challenges/invites/${inviteId}/seen`);
   return response.data;
 }

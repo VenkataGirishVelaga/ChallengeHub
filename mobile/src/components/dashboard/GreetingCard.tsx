@@ -2,14 +2,13 @@ import { StyleSheet, View } from "react-native";
 
 import AppText from "@/components/AppText";
 import { SPACING } from "@/constants/spacing";
+import { COLORS } from "@/constants/colors";
 
 type GreetingCardProps = {
   name: string;
 };
 
-export default function GreetingCard({
-  name,
-}: GreetingCardProps) {
+export default function GreetingCard({ name }: GreetingCardProps) {
   const hour = new Date().getHours();
 
   let greeting = "Good Evening";
@@ -22,13 +21,11 @@ export default function GreetingCard({
 
   return (
     <View style={styles.container}>
-      <AppText variant="caption">
+      <AppText variant="label" color={COLORS.primary}>
         {greeting} 👋
       </AppText>
 
-      <AppText variant="title">
-        {name}
-      </AppText>
+      <AppText variant="title">{name}</AppText>
     </View>
   );
 }

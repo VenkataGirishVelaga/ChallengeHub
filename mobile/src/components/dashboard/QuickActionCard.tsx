@@ -24,15 +24,15 @@ export default function QuickActionCard({
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.card, style]}
+      style={({ pressed }) => [
+        styles.card,
+        pressed && styles.cardPressed,
+        style,
+      ]}
     >
-      <Ionicons
-        name={icon}
-        size={30}
-        color={COLORS.primary}
-      />
+      <Ionicons name={icon} size={28} color={COLORS.primary} />
 
-      <AppText style={styles.title}>
+      <AppText variant="label" style={styles.title}>
         {title}
       </AppText>
     </Pressable>
@@ -48,15 +48,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
 
-    minHeight: 120,
+    minHeight: 112,
 
     borderWidth: 1,
     borderColor: COLORS.border,
   },
 
+  cardPressed: {
+    borderColor: COLORS.primary,
+  },
+
   title: {
-    marginTop: SPACING.md,
-    fontWeight: "700",
+    marginTop: SPACING.sm,
     textAlign: "center",
   },
 });

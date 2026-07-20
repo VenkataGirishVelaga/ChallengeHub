@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import AppText from "@/components/AppText";
 import PrimaryButton from "@/components/PrimaryButton";
+import RivalsBar from "@/components/challenges/RivalsBar";
 
 import { checkIn, leaveChallenge } from "@/services/challenges";
 
@@ -19,6 +20,9 @@ type Props = {
 
 export default function ActiveChallengeCard({ entry, onChanged }: Props) {
   const [loading, setLoading] = useState(false);
+  const isCheckin = entry.challenge_type === "checkin";
+  const isWalking = entry.activity_type === "walking";
+  const accentColor = isCheckin ? COLORS.accent : COLORS.primary;
 
   function confirmLeave() {
     Alert.alert(
@@ -67,16 +71,16 @@ export default function ActiveChallengeCard({ entry, onChanged }: Props) {
     }
   }
 
-  const isCheckin = entry.challenge_type === "checkin";
-
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { borderColor: `${accentColor}33` }]}>
       <View style={styles.header}>
-        <Ionicons
-          name={isCheckin ? "flame" : "flash"}
-          size={22}
-          color={COLORS.primary}
-        />
+        <View style={[styles.iconChip, { backgroundColor: `${accentColor}22` }]}>
+          <Ionicons
+            name={isCheckin ? "flame" : isWalking ? "footsteps" : "flash"}
+            size={18}
+            color={accentColor}
+          />
+        </View>
 
         <AppText style={styles.title} numberOfLines={1}>
           {entry.title}
@@ -86,7 +90,7 @@ export default function ActiveChallengeCard({ entry, onChanged }: Props) {
           <Ionicons
             name="trash-outline"
             size={20}
-            color={COLORS.textSecondary}
+            color={COLORS.textMuted}
           />
         </Pressable>
       </View>
@@ -94,11 +98,11 @@ export default function ActiveChallengeCard({ entry, onChanged }: Props) {
       {isCheckin ? (
         <>
           <View style={styles.streakRow}>
-            <AppText style={styles.streakNumber}>
+            <AppText variant="stat" color={COLORS.accent}>
               {entry.current_streak}
             </AppText>
-            <AppText variant="caption">
-              / {entry.target_days} day streak
+            <AppText variant="label" style={styles.streakLabel}>
+              / {entry.target_days} DAY STREAK
             </AppText>
           </View>
 
@@ -110,19 +114,31 @@ export default function ActiveChallengeCard({ entry, onChanged }: Props) {
             }
             disabled={entry.checked_in_today || loading}
             onPress={handleCheckIn}
-            style={entry.checked_in_today ? styles.doneButton : undefined}
           />
         </>
       ) : (
         <>
-          <AppText variant="caption" style={styles.targetLine}>
-            🎯 {entry.progress} / {entry.target} {entry.unit}
-          </AppText>
+          <View style={styles.streakRow}>
+            <AppText variant="stat" color={COLORS.primary}>
+              {entry.progress}
+            </AppText>
+            <AppText variant="label" style={styles.streakLabel}>
+              / {entry.target} {entry.unit?.toUpperCase()}
+            </AppText>
+          </View>
 
           <PrimaryButton
-            title="Start"
-            onPress={() => router.push("/running/start")}
+            title={entry.activity_type === "walking" ? "Go Walk" : "Go Run"}
+            onPress={() =>
+              router.push(
+                entry.activity_type === "walking"
+                  ? "/walking/start"
+                  : "/running/start"
+              )
+            }
           />
+
+          <RivalsBar challengeId={entry.challenge_id} />
         </>
       )}
     </View>
@@ -135,6 +151,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.xl,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
+    borderWidth: 1.5,
   },
 
   header: {
@@ -142,6 +159,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: SPACING.sm,
     marginBottom: SPACING.md,
+  },
+
+  iconChip: {
+    width: 32,
+    height: 32,
+    borderRadius: RADIUS.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   title: {
@@ -153,21 +178,12 @@ const styles = StyleSheet.create({
   streakRow: {
     flexDirection: "row",
     alignItems: "baseline",
-    gap: 6,
+    gap: 8,
     marginBottom: SPACING.lg,
   },
 
-  streakNumber: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: COLORS.primary,
-  },
-
-  targetLine: {
-    marginBottom: SPACING.lg,
-  },
-
-  doneButton: {
-    opacity: 0.6,
+  streakLabel: {
+    textTransform: "none",
+    letterSpacing: 0.4,
   },
 });

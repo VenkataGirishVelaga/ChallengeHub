@@ -2,11 +2,10 @@ import { View, StyleSheet } from "react-native";
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert } from "react-native";
-import { saveRun } from "@/services/running";
+import { saveWalk } from "@/services/walking";
 import Screen from "@/components/Screen";
 import AppText from "@/components/AppText";
 import PrimaryButton from "@/components/PrimaryButton";
-import { getActivityMeta } from "@/utils/activity";
 
 const BADGE_TITLES: Record<string, string> = {
   first_run: "🏃 First Steps",
@@ -17,64 +16,31 @@ const BADGE_TITLES: Record<string, string> = {
   distance_100k: "🏆 Centurion",
 };
 
-export default function RunSummaryScreen() {
+export default function WalkSummaryScreen() {
   const [saving, setSaving] = useState(false);
-  const {
-    distance,
-    seconds,
-    calories,
-    pace,
-    activity: activityParam,
-  } = useLocalSearchParams();
-
-  const activity = getActivityMeta(
-    Array.isArray(activityParam) ? activityParam[0] : activityParam
-  );
+  const { steps, seconds, calories } = useLocalSearchParams();
 
   return (
     <Screen>
       <View style={styles.container}>
         <AppText style={styles.title}>
-          🎉 {activity.noun} Complete
+          🎉 Walk Complete
         </AppText>
 
-        <AppText style={styles.item}>
-          Distance
-        </AppText>
+        <AppText style={styles.item}>Steps</AppText>
+        <AppText style={styles.value}>{steps}</AppText>
 
-        <AppText style={styles.value}>
-          {distance} km
-        </AppText>
-
-        <AppText style={styles.item}>
-          Time
-        </AppText>
-
+        <AppText style={styles.item}>Time</AppText>
         <AppText style={styles.value}>
           {Math.floor(Number(seconds) / 60)}:
-          {(Number(seconds) % 60)
-            .toString()
-            .padStart(2, "0")}
+          {(Number(seconds) % 60).toString().padStart(2, "0")}
         </AppText>
 
-        <AppText style={styles.item}>
-          Pace
-        </AppText>
-
-        <AppText style={styles.value}>
-          {pace}
-        </AppText>
-
-        <AppText style={styles.item}>
-          Calories
-        </AppText>
-
-        <AppText style={styles.value}>
-          {calories} kcal
-        </AppText>
+        <AppText style={styles.item}>Calories</AppText>
+        <AppText style={styles.value}>{calories} kcal</AppText>
 
         <PrimaryButton
-          title={saving ? "Saving..." : `Save ${activity.noun}`}
+          title={saving ? "Saving..." : "Save Walk"}
           disabled={saving}
           onPress={async () => {
             if (saving) return;
@@ -82,8 +48,8 @@ export default function RunSummaryScreen() {
             setSaving(true);
 
             try {
-              const result = await saveRun(
-                Number(distance),
+              const result = await saveWalk(
+                Number(steps),
                 Number(seconds),
                 Number(calories)
               );
@@ -98,7 +64,9 @@ export default function RunSummaryScreen() {
                 const names = result.new_badges
                   .map((code: string) => BADGE_TITLES[code] ?? code)
                   .join("\n");
-                messages.push(`New badge${result.new_badges.length > 1 ? "s" : ""} unlocked:\n${names}`);
+                messages.push(
+                  `New badge${result.new_badges.length > 1 ? "s" : ""} unlocked:\n${names}`
+                );
               }
 
               if (messages.length) {

@@ -28,7 +28,9 @@ export default function TextField({
 
   return (
     <View style={styles.container}>
-      <AppText style={styles.label}>{label}</AppText>
+      <AppText variant="label" style={styles.label}>
+        {label}
+      </AppText>
 
       <View
         style={[
@@ -42,7 +44,7 @@ export default function TextField({
         <TextInput
           {...props}
           style={styles.input}
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor={COLORS.textMuted}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         />
@@ -70,7 +72,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.surface,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: COLORS.border,
     borderRadius: RADIUS.lg,
     paddingHorizontal: SPACING.md,
@@ -85,6 +87,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     paddingVertical: 16,
     fontSize: 16,
+    fontWeight: "600",
   },
 
   inputError: {

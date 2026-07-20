@@ -148,6 +148,7 @@ def get_all_active_challenges(
                     "challenge_id": challenge.id,
                     "title": challenge.title,
                     "challenge_type": "distance",
+                    "activity_type": challenge.type,
                     "progress": user_challenge.progress,
                     "target": challenge.target,
                     "unit": challenge.unit,
@@ -162,14 +163,14 @@ def get_active_challenge(
     db: Session,
     user_id: int,
     checkin_only: bool = False,
+    activity_type: str | None = None,
 ):
     """
-    A user can now have two active challenges at once — one
-    DISTANCE-type (auto-tracked via runs) and one CHECKIN-type
-    (manual daily tap) — so this filters by type rather than assuming
-    a single active challenge. Anything not explicitly "CHECKIN" is
-    treated as distance-based, so existing challenges created before
-    this distinction existed keep working unchanged.
+    A user can have multiple active challenges at once — running,
+    walking, and check-in are all independent — so this filters by
+    the specific type requested rather than assuming a single active
+    challenge. activity_type takes priority when both are given;
+    checkin_only=True is kept as the existing shorthand for "CHECKIN".
     """
     query = (
         db.query(Challenge)
@@ -185,6 +186,8 @@ def get_active_challenge(
 
     if checkin_only:
         query = query.filter(Challenge.type == "CHECKIN")
+    elif activity_type:
+        query = query.filter(Challenge.type == activity_type)
     else:
         query = query.filter(Challenge.type != "CHECKIN")
 
@@ -195,12 +198,15 @@ def get_active_progress(
     db: Session,
     user_id: int,
     checkin_only: bool = False,
+    activity_type: str | None = None,
 ):
     """
     Returns progress details for the user's active challenge of the
-    requested type. DISTANCE responses look like before (progress/
-    target/percent in km). CHECKIN responses additionally include
-    streak fields, with percent based on current_streak vs target.
+    requested type. DISTANCE responses (running/walking) look the
+    same shape (progress/target/percent), just in different units —
+    km for running, steps for walking. CHECKIN responses additionally
+    include streak fields, with percent based on current_streak vs
+    target.
     """
     query = (
         db.query(UserChallenge, Challenge)
@@ -213,6 +219,8 @@ def get_active_progress(
 
     if checkin_only:
         query = query.filter(Challenge.type == "CHECKIN")
+    elif activity_type:
+        query = query.filter(Challenge.type == activity_type)
     else:
         query = query.filter(Challenge.type != "CHECKIN")
 
@@ -257,6 +265,7 @@ def get_active_progress(
     return {
         "challenge_id": challenge.id,
         "title": challenge.title,
+        "activity_type": challenge.type,
         "progress": user_challenge.progress,
         "target": challenge.target,
         "unit": challenge.unit,
@@ -269,11 +278,14 @@ def update_progress(
     db: Session,
     user_id: int,
     distance: float,
+    activity_type: str = "running",
 ):
     """
-    Applies run distance to the user's active DISTANCE-type challenge
-    only — explicitly excludes CHECKIN-type challenges, which are
-    never touched by saved runs (they only advance via check_in()).
+    Applies run/walk distance to the user's active challenge of the
+    SAME activity_type only. Matching exactly (not just "!= CHECKIN")
+    matters here: a walking session must never complete a running
+    challenge, and vice versa — they use incompatible units (km vs
+    steps), and conflating them would silently corrupt progress.
     """
     result = (
         db.query(UserChallenge, Challenge)
@@ -281,7 +293,7 @@ def update_progress(
         .filter(
             UserChallenge.user_id == user_id,
             UserChallenge.status == "ACTIVE",
-            Challenge.type != "CHECKIN",
+            Challenge.type == activity_type,
         )
         .first()
     )

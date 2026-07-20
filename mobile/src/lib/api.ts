@@ -10,7 +10,7 @@ import {
 
 // NOTE: update this to match whatever your PC's current LAN IP is
 // (ipconfig / ifconfig) — it changes when you switch networks.
-const BASE_URL = "http://192.168.1.4:8000";
+const BASE_URL = "http://192.168.137.72:8000";
 
 export const api = axios.create({
   baseURL: BASE_URL,

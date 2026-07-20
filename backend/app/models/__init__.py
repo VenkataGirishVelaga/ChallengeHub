@@ -5,6 +5,7 @@ from app.models.run import Run
 from app.models.user_badge import UserBadge
 from app.models.friendship import Friendship
 from app.models.checkin import CheckIn
+from app.models.challenge_invite import ChallengeInvite
 
 __all__ = [
 	"User",
@@ -14,4 +15,5 @@ __all__ = [
 	"UserBadge",
 	"Friendship",
 	"CheckIn",
+	"ChallengeInvite",
 ]

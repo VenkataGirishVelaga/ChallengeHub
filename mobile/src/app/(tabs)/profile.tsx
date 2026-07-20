@@ -131,6 +131,13 @@ export default function ProfileScreen() {
             </AppText>
             <AppText variant="caption">Calories</AppText>
           </View>
+
+          <View style={styles.statCard}>
+            <AppText style={styles.statValue}>
+              {Math.round(stats?.total_steps ?? 0).toLocaleString()}
+            </AppText>
+            <AppText variant="caption">👣 Steps Walked</AppText>
+          </View>
         </View>
 
         <AppText variant="body" style={styles.sectionTitle}>

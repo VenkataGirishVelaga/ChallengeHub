@@ -14,6 +14,22 @@ class ChallengeCreate(BaseModel):
     is_public: bool = True
 
 
+class ChallengeUpdate(BaseModel):
+    """
+    Deliberately excludes `type` and `unit` — once a challenge has
+    members tracking progress against it, changing the activity or
+    unit of measurement would silently corrupt everyone's existing
+    progress numbers (e.g. km vs steps). Title/description/target and
+    the reward fields are safe to change any time.
+    """
+    title: str | None = None
+    description: str | None = None
+    target: int | None = None
+    difficulty: str | None = None
+    xp_reward: int | None = None
+    is_public: bool | None = None
+
+
 class ChallengeResponse(BaseModel):
     id: int
     title: str

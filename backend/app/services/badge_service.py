@@ -9,10 +9,11 @@ from app.models.user_badge import UserBadge
 # admin dashboard), so a table + seed migration would be overhead with
 # no payoff right now. UserBadge just records which codes a user earned.
 #
-# NOTE: Run.distance is stored in KILOMETERS. GPS tracking internally
-# accumulates meters (mobile hooks/useRunTracker.ts via geolib), but
-# app/running/summary.tsx converts to km (distance / 1000) before
-# calling saveRun(), so that's what actually reaches this table.
+# NOTE: Run.distance is stored in KILOMETERS for activity_type
+# "running" rows, but "walking" rows store a raw STEP COUNT in that
+# same column (see Run model). The distance_* thresholds below only
+# ever look at running rows so a 10,000-step walk can't accidentally
+# trigger the "10K Club" badge meant for 10 running kilometers.
 BADGE_DEFINITIONS = [
     {
         "code": "first_run",
@@ -80,10 +81,10 @@ def check_and_award_badges(
     user_id: int,
 ):
     """
-    Called after every saved run. Compares the user's run count and
-    total distance against BADGE_DEFINITIONS thresholds and awards
-    any newly-earned badges. Returns the list of newly awarded codes
-    so the frontend can surface a "badge unlocked" moment.
+    Called after every saved run. run_count counts ALL activities
+    (running + walking) toward the "complete N runs" streak-style
+    badges, but total_distance only ever sums "running" rows — see
+    the module note on why walking's step counts can't be mixed in.
     """
     run_count = (
         db.query(func.count(Run.id))
@@ -93,7 +94,10 @@ def check_and_award_badges(
 
     total_distance = (
         db.query(func.coalesce(func.sum(Run.distance), 0))
-        .filter(Run.user_id == user_id)
+        .filter(
+            Run.user_id == user_id,
+            Run.activity_type == "running",
+        )
         .scalar()
     ) or 0
 

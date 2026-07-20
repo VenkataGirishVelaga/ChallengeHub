@@ -30,6 +30,7 @@ def save_run(
         distance=data.distance,
         duration=data.duration,
         calories=data.calories,
+        activity_type=data.activity_type,
     )
 
     run = create_run(db, run)
@@ -38,6 +39,7 @@ def save_run(
         db,
         user_id=current_user.id,
         distance=data.distance,
+        activity_type=data.activity_type,
     )
 
     challenge_completed = (
@@ -56,6 +58,7 @@ def save_run(
         distance=run.distance,
         duration=run.duration,
         calories=run.calories,
+        activity_type=run.activity_type,
         created_at=run.created_at,
         challenge_completed=challenge_completed,
         new_badges=new_badges,

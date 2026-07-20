@@ -6,6 +6,7 @@ class RunCreate(BaseModel):
     distance: float
     duration: int
     calories: int
+    activity_type: str = "running"
 
 
 class RunResponse(RunCreate):
@@ -28,3 +29,4 @@ class RunStats(BaseModel):
     total_duration: int
     total_calories: int
     avg_pace_seconds_per_km: float | None = None
+    total_steps: float = 0

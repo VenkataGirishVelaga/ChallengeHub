@@ -1,16 +1,16 @@
 import axios from "axios";
 import { api } from "./api";
 
-export async function saveRun(
-  distance: number,
+export async function saveWalk(
+  steps: number,
   duration: number,
   calories: number
 ) {
   const payload = {
-    distance,
+    distance: steps,
     duration,
     calories,
-    activity_type: "running",
+    activity_type: "walking",
   };
 
   try {

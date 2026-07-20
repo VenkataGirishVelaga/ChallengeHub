@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 
 import ScrollScreen from "@/components/ScrollScreen";
@@ -11,7 +11,11 @@ import ActiveChallengeCard from "@/components/dashboard/ActiveChallengeCard";
 import QuickActionCard from "@/components/dashboard/QuickActionCard";
 
 import { getUser } from "@/services/authStorage";
-import { getAllActiveChallenges } from "@/services/challenges";
+import {
+  getAllActiveChallenges,
+  getUnseenAcceptedInvites,
+  markInviteSeen,
+} from "@/services/challenges";
 import { SPACING } from "@/constants/spacing";
 import { COLORS } from "@/constants/colors";
 import { RADIUS } from "@/constants/radius";
@@ -32,10 +36,30 @@ export default function HomeScreen() {
     }
   }, []);
 
+  const checkAcceptedInvites = useCallback(async () => {
+    try {
+      const invites = await getUnseenAcceptedInvites();
+
+      // Shown one at a time (rather than batched into one Alert) so
+      // each still reads naturally if there happen to be several.
+      for (const invite of invites) {
+        Alert.alert(
+          "🎉 Challenge accepted!",
+          `${invite.receiver_name} accepted your challenge to "${invite.challenge_title}". Good luck!`
+        );
+
+        await markInviteSeen(invite.id);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [loadData])
+      checkAcceptedInvites();
+    }, [loadData, checkAcceptedInvites])
   );
 
   return (
@@ -49,14 +73,14 @@ export default function HomeScreen() {
           streak={user?.streak ?? 0}
         />
 
-        <AppText variant="body" style={styles.sectionTitle}>
-          Today&apos;s Challenges
+        <AppText variant="heading" style={styles.sectionTitle}>
+          Today's Challenges
         </AppText>
 
         {activeChallenges.length === 0 ? (
           <View style={styles.emptyCard}>
             <AppText variant="caption" style={styles.emptyText}>
-              You haven&apos;t joined any challenges yet.
+              You haven't joined any challenges yet.
             </AppText>
 
             <QuickActionCard
@@ -75,7 +99,7 @@ export default function HomeScreen() {
           ))
         )}
 
-        <AppText variant="body" style={styles.quickTitle}>
+        <AppText variant="heading" style={styles.quickTitle}>
           Quick Actions
         </AppText>
 

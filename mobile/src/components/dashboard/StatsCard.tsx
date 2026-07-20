@@ -1,5 +1,4 @@
 import { StyleSheet, View } from "react-native";
-
 import { Ionicons } from "@expo/vector-icons";
 
 import AppText from "@/components/AppText";
@@ -12,30 +11,24 @@ type StatsCardProps = {
   streak: number;
 };
 
-export default function StatsCard({
-  streak,
-}: StatsCardProps) {
+export default function StatsCard({ streak }: StatsCardProps) {
   return (
     <View style={styles.card}>
-      <Ionicons
-        name="flame"
-        size={34}
-        color="#F97316"
-      />
+      <View style={styles.iconRing}>
+        <Ionicons name="flame" size={30} color={COLORS.primary} />
+      </View>
 
-      <AppText style={styles.number}>
+      <AppText variant="display" color={COLORS.primary} style={styles.number}>
         {streak}
       </AppText>
 
-      <AppText variant="caption">
-        Day Streak
-      </AppText>
+      <AppText variant="label">Day Streak</AppText>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-   card: {
+  card: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
     paddingVertical: SPACING.xl,
@@ -47,10 +40,17 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
 
-   number: {
-    fontSize: 42,
-    fontWeight: "900",
-    color: COLORS.primary,
-    marginVertical: SPACING.sm,
-   },
+  iconRing: {
+    width: 56,
+    height: 56,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.primarySoft,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: SPACING.sm,
+  },
+
+  number: {
+    marginVertical: SPACING.xs,
+  },
 });
